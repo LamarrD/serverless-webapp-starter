@@ -2,7 +2,6 @@ service: uf-tech-talk-test # Change this to be unique
 provider:
   name: aws
   runtime: python2.7
-  # profile: personal
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -18,6 +17,7 @@ functions:
           path: hello
           method: get
 
+# Added this for speed and to keep deployment packages small
 package:
   excludeDevDependencies: True
   exclude:
@@ -31,12 +31,14 @@ plugins:
   - serverless-s3-sync
 resources:
   Resources:
+    # Bucket for react website files
     AssetsBucket:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:service}
         WebsiteConfiguration:
           IndexDocument: index.html
+    # Bucket Policy that allows it to be a website
     AssetsBucketPolicy:
       Type: AWS::S3::BucketPolicy
       Properties:
@@ -52,6 +54,7 @@ resources:
               Resource:
                 Fn::Join:
                   ["", ["arn:aws:s3:::", { "Ref": "AssetsBucket" }, "/*"]]
+    # DynamoDB Table
     usersTable:
       Type: AWS::DynamoDB::Table
       Properties:
